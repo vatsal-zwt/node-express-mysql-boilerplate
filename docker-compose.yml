@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  dockerNodeApp:
+  dockerizeExpressApp:
     build:
       args:
         user: developer
@@ -9,29 +9,23 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: app
-    container_name: docker-node-container
+    container_name: express-app-container
     restart: unless-stopped
-    # environment:
-      # VIRTUAL_HOST: laravel.test
     working_dir: /var/www/
     volumes:
       - ./:/var/www
       - ~/.ssh:/root/.ssh
-    expose:
-      - "5000"
     ports:
     - "5000:5000"
-    environment:
-      - NODE_PORT=5000
     networks:
-      - nodeDocker
+      - dockerizeExpress
   
   db:
     image: mysql:8.0
     container_name: mysql-container
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       # MYSQL_ALLOW_EMPTY_PASSWORD=yes  # set when you don't want set password for root user
@@ -41,22 +35,7 @@ services:
     volumes:
       - ./docker-config/mysql:/var/lib/mysql
     networks:
-      - nodeDocker
-
-  nginx:
-    image: nginx:alpine
-    container_name: nginx-container
-    restart: unless-stopped
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./:/var/www
-      - ./docker-config/nginx:/etc/nginx/conf.d
-      - ./docker-config/nginx/ssl:/etc/nginx/conf.d/ssl
-      - ./docker-config/nginx/phpmyadmin.conf:/etc/nginx/conf.d/phpmyadmin.conf
-    networks:
-      - nodeDocker
+      - dockerizeExpress
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -71,8 +50,8 @@ services:
         PMA_PORT: 3306
         PMA_ARBITRARY: 1
     networks:
-        - nodeDocker
+        - dockerizeExpress
 
 networks:
-  nodeDocker:
+  dockerizeExpress:
     driver: bridge
